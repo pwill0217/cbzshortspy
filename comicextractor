@@ -1,0 +1,91 @@
+import zipfile
+import os
+import google.genai as genai
+from google import genai
+from google.genai import types
+from PIL import Image
+
+#$env:GEMINI_API_KEY="your_key_here"
+
+#
+# to setup the key use environment variable in the terminal
+# it will last until the terminal is closed
+
+
+client = genai.Client() 
+
+def extract_cbz(cbz_file_path, extraction_directory):
+    # Ensure the extraction directory exists
+    if not os.path.exists(extraction_directory):
+        os.makedirs(extraction_directory)
+
+    # Open the CBZ file in read mode
+    try:
+        with zipfile.ZipFile(cbz_file_path, 'r') as z:
+            # Extract all files to the specified directory
+            z.extractall(extraction_directory)
+        print(f"Successfully extracted '{cbz_file_path}' to '{extraction_directory}'")
+    except zipfile.BadZipFile:
+        print(f"Error: '{cbz_file_path}' is not a valid zip file.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# --- Example Usage ---
+# Replace 'my_comic.cbz' with the path to your CBZ file
+# Replace 'output_folder' with the desired extraction destination
+extract_cbz(
+    r"C:\Users\pwill\OneDrive\Documents\Absolute Batman 016 (2026) (Digital) (Shan-Empire).cbz",
+    r"C:\Users\pwill\OneDrive\Documents\comic_output"
+)
+
+comic_output = r"C:\Users\pwill\OneDrive\Documents\comic_output"
+files = os.listdir(r"C:\Users\pwill\OneDrive\Documents\comic_output")
+
+image_files = []
+for root, dirs, files in os.walk(comic_output):
+    for f in files:
+        if f.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".gif")):
+            image_files.append(os.path.join(root, f))
+image_files.sort()
+
+
+#for filename in image_files:
+   # image_path = os.path.join(comic_output, filename)
+   # print("Processing:",image_path)
+
+page_descriptions = []
+for index, filename in enumerate(image_files, start=1):
+    image_path = os.path.join(comic_output, filename)
+    
+    try:
+        img = Image.open(image_path)
+    except Exception as e:
+        print(f"Failed to open {r"C:\Users\pwill\OneDrive\Documents\comic_output"}: {e}")
+        continue  # skip this file and continue the loop
+    
+    prompt = (
+        "Provide a brief description of the following comic book page image. "
+        "Focus on the main characters, actions, and setting depicted in the image. "
+        "Keep the description concise, around 20 words.\n"
+        f"Image details: {img.format}, Size: {img.size}, Mode: {img.mode}"
+    )
+try:
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[
+            prompt,
+            Image.open(image_path)
+        ]
+    )
+    description = response.text.strip()
+except Exception as e:
+    description = f"Description unavailable: {e}"
+
+
+description = response.text
+print(description)
+
+#print(image_files)
+print("Files found:", files)
+print(page_descriptions)
+
