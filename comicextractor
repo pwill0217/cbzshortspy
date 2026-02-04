@@ -38,8 +38,8 @@ extract_cbz(
     r"C:\Users\pwill\OneDrive\Documents\comic_output"
 )
 
-comic_output = r"C:\Users\pwill\OneDrive\Documents\comic_output"
-files = os.listdir(r"C:\Users\pwill\OneDrive\Documents\comic_output")
+comic_output = r"your directory here"
+files = os.listdir(r"your directory here")
 
 image_files = []
 for root, dirs, files in os.walk(comic_output):
@@ -60,7 +60,7 @@ for index, filename in enumerate(image_files, start=1):
     try:
         img = Image.open(image_path)
     except Exception as e:
-        print(f"Failed to open {r"C:\Users\pwill\OneDrive\Documents\comic_output"}: {e}")
+        print(f"Failed to open {r"your directory here"}: {e}")
         continue  # skip this file and continue the loop
     
     prompt = (
